@@ -63,6 +63,7 @@ http://127.0.0.1:8000
 ## Notes
 
 - The saved model is bundled in `output/model.pkl` and the dataset is bundled in `output/final_dataset.csv`.
+- The research notebooks and original dataset files are bundled in `Dataset/` for reference and offline analysis.
 - The repo is fully self-contained for local use; no external model download or preprocessing step is required.
 - If the machine has limited disk space, install into a clean environment or a drive with enough free space before running the server.
 - The server exposes the prediction API at `/api/predict` and the metadata API at `/api/model-info`.
