@@ -7,3 +7,4 @@ xgboost
 sqlmodel
 passlib[bcrypt]
 python-dotenv
+pandas
