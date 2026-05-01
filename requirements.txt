@@ -4,3 +4,6 @@ joblib
 numpy
 scikit-learn
 xgboost
+sqlmodel
+passlib[bcrypt]
+python-dotenv
