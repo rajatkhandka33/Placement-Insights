@@ -15,9 +15,9 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 import pandas as pd
 import os
+import sqlite3
 
 # database / auth
-from sqlmodel import SQLModel, Field as SQLField, create_engine, Session, select
 from passlib.context import CryptContext
 
 
@@ -106,21 +106,29 @@ app.add_middleware(
 SESSIONS: Dict[str, Dict[str, Any]] = {}
 
 
-# --- Database & auth setup ---
-DATABASE_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, echo=False, connect_args=connect_args)
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256","bcrypt"], deprecated="auto")
 
 
-class User(SQLModel, table=True):
-    id: Optional[int] = SQLField(default=None, primary_key=True)
-    username: str = SQLField(index=True)
-    password_hash: str
-    role: str = SQLField(default="student")
-    display_name: Optional[str] = None
-    student_id: Optional[int] = None
+DB_PATH = BASE_DIR / "db.sqlite3"
+
+
+def init_db():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password_hash TEXT,
+            role TEXT,
+            display_name TEXT,
+            student_id INTEGER
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
 
 
 def hash_password(password: str) -> str:
@@ -134,26 +142,68 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
+def db_get_user_by_username(username: str):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT id,username,password_hash,role,display_name,student_id FROM users WHERE username = ?", (username,))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "username": row[1],
+        "password_hash": row[2],
+        "role": row[3],
+        "display_name": row[4],
+        "student_id": row[5],
+    }
+
+
+def db_list_users():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT id,username,role,display_name,student_id FROM users ORDER BY id ASC")
+    rows = cur.fetchall()
+    conn.close()
+    users = []
+    for r in rows:
+        users.append({"id": r[0], "username": r[1], "role": r[2], "display_name": r[3], "student_id": r[4]})
+    return users
+
+
+def db_create_user(username: str, password: str, role: str = "student", display_name: Optional[str] = None, student_id: Optional[int] = None):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO users (username,password_hash,role,display_name,student_id) VALUES (?,?,?,?,?)",
+            (username, hash_password(password), role, display_name, student_id),
+        )
+        conn.commit()
+        user_id = cur.lastrowid
+    except sqlite3.IntegrityError:
+        conn.close()
+        return None
+    conn.close()
+    return db_get_user_by_username(username)
+
+
 @app.on_event("startup")
 def on_startup():
-    # ensure tables exist
-    SQLModel.metadata.create_all(engine)
+    init_db()
     # migrate any existing users.json into DB if DB empty
-    with Session(engine) as session:
-        existing = session.exec(select(User)).first()
-        if not existing:
-            users = load_users()
-            for u in users:
-                password = u.get("password", "")
-                user = User(
-                    username=u.get("username"),
-                    password_hash=hash_password(password),
-                    role=u.get("role", "student"),
-                    display_name=u.get("display_name"),
-                    student_id=u.get("student_id"),
-                )
-                session.add(user)
-            session.commit()
+    existing = db_list_users()
+    if not existing:
+        users = load_users()
+        for u in users:
+            db_create_user(
+                username=u.get("username"),
+                password=u.get("password", ""),
+                role=u.get("role", "student"),
+                display_name=u.get("display_name"),
+                student_id=u.get("student_id"),
+            )
 
 
 def load_model():
@@ -461,9 +511,7 @@ def get_user_public(user):
 
 
 def get_user_by_username(username: str):
-    with Session(engine) as session:
-        statement = select(User).where(User.username == username)
-        return session.exec(statement).first()
+    return db_get_user_by_username(username)
 
 
 def get_current_user(authorization: Optional[str] = Header(None)):
@@ -765,7 +813,7 @@ def get_site_data():
 @app.post("/api/auth/login")
 def login(payload: LoginRequest):
     user = get_user_by_username(payload.username)
-    if not user or not verify_password(payload.password, getattr(user, "password_hash", "")):
+    if not user or not verify_password(payload.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     token = uuid4().hex
@@ -818,16 +866,15 @@ def me(current_user: Dict[str, Any] = Depends(get_current_user)):
 def bootstrap(current_user: Dict[str, Any] = Depends(get_current_user)):
     student_profiles = []
     if current_user.get("role") == "admin":
-        with Session(engine) as session:
-            users = session.exec(select(User)).all()
-            for user in users:
-                if getattr(user, "role", None) == "student" and getattr(user, "student_id", None) is not None:
-                    row = get_row_for_student(user.student_id)
-                    if row:
-                        payload = build_student_profile(row)
-                        payload["username"] = user.username
-                        payload["display_name"] = user.display_name or user.username
-                        student_profiles.append(payload)
+        users = db_list_users()
+        for user in users:
+            if user.get("role") == "student" and user.get("student_id") is not None:
+                row = get_row_for_student(user.get("student_id"))
+                if row:
+                    payload = build_student_profile(row)
+                    payload["username"] = user.get("username")
+                    payload["display_name"] = user.get("display_name") or user.get("username")
+                    student_profiles.append(payload)
     else:
         student_row = get_row_for_student(current_user.get("student_id"))
         if student_row:
@@ -850,36 +897,33 @@ def bootstrap(current_user: Dict[str, Any] = Depends(get_current_user)):
 @app.get("/api/students")
 def list_students(current_user: Dict[str, Any] = Depends(require_admin)):
     student_profiles = []
-    with Session(engine) as session:
-        users = session.exec(select(User)).all()
-        for user in users:
-            if getattr(user, "role", None) == "student" and getattr(user, "student_id", None) is not None:
-                row = get_row_for_student(user.student_id)
-                if row:
-                    payload = build_student_profile(row)
-                    payload["username"] = user.username
-                    payload["display_name"] = user.display_name or user.username
-                    student_profiles.append(payload)
+    users = db_list_users()
+    for user in users:
+        if user.get("role") == "student" and user.get("student_id") is not None:
+            row = get_row_for_student(user.get("student_id"))
+            if row:
+                payload = build_student_profile(row)
+                payload["username"] = user.get("username")
+                payload["display_name"] = user.get("display_name") or user.get("username")
+                student_profiles.append(payload)
     return student_profiles
 
 
 @app.post("/api/admin/students")
 def create_student(payload: CreateStudentRequest, current_user: Dict[str, Any] = Depends(require_admin)):
-    with Session(engine) as session:
-        exists = session.exec(select(User).where(User.username == payload.username)).first()
-        if exists:
-            raise HTTPException(status_code=400, detail="Username already exists")
-        new_user = User(
-            username=payload.username,
-            password_hash=hash_password(payload.password),
-            role="student",
-            display_name=payload.display_name,
-            student_id=payload.student_id,
-        )
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-        return get_user_public(new_user)
+    exists = db_get_user_by_username(payload.username)
+    if exists:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    created = db_create_user(
+        username=payload.username,
+        password=payload.password,
+        role="student",
+        display_name=payload.display_name,
+        student_id=payload.student_id,
+    )
+    if not created:
+        raise HTTPException(status_code=500, detail="Failed to create user")
+    return get_user_public(created)
 
 
 @app.get("/api/students/{student_id}")
