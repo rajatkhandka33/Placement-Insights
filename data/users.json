@@ -1,0 +1,29 @@
+[
+  {
+    "username": "admin",
+    "password": "admin123",
+    "role": "admin",
+    "display_name": "Placement Admin"
+  },
+  {
+    "username": "student1",
+    "password": "student123",
+    "role": "student",
+    "student_id": 1,
+    "display_name": "Student One"
+  },
+  {
+    "username": "student2",
+    "password": "student123",
+    "role": "student",
+    "student_id": 2,
+    "display_name": "Student Two"
+  },
+  {
+    "username": "student3",
+    "password": "student123",
+    "role": "student",
+    "student_id": 3,
+    "display_name": "Student Three"
+  }
+]

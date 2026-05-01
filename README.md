@@ -2,6 +2,8 @@
 
 This project is a complete AI/ML placement website built from the research paper, poster, and bundled dataset.
 
+It now includes local login with `admin` and `student` roles, a sidebar-based dashboard, student profiles, analytics pages, and CSV download actions.
+
 ## Stack
 
 - Frontend: React, HTML, CSS, and JavaScript
@@ -11,12 +13,15 @@ This project is a complete AI/ML placement website built from the research paper
 
 ## What the website includes
 
+- Local login page with role-based access
 - Placement prediction form
 - Dataset-wide analytics and group trends
 - Model metadata and feature transparency
 - Role suggestions, readiness scoring, and next steps
 - Research summary aligned with the poster and paper
-- React-powered single-page frontend served through FastAPI
+- React-powered routed frontend served through FastAPI
+- Admin and student profile views
+- CSV downloads for overall statistics, per-student data, raw dataset, and predictions
 
 ## Run locally on Windows
 
@@ -60,10 +65,22 @@ uvicorn app:app --host 127.0.0.1 --port 8000
 http://127.0.0.1:8000
 ```
 
+7. Log in with one of the seeded local accounts:
+
+```text
+Admin: admin / admin123
+Student: student1 / student123
+Student: student2 / student123
+Student: student3 / student123
+```
+
+8. Use the sidebar to switch between Dashboard, Analytics, Students, Profiles, and Downloads.
+
 ## Notes
 
 - The saved model is bundled in `output/model.pkl` and the dataset is bundled in `output/final_dataset.csv`.
 - The research notebooks and original dataset files are bundled in `Dataset/` for reference and offline analysis.
+- Local login credentials are stored in `data/users.json`.
 - The repo is fully self-contained for local use; no external model download or preprocessing step is required.
 - If the machine has limited disk space, install into a clean environment or a drive with enough free space before running the server.
 - The server exposes the prediction API at `/api/predict` and the metadata API at `/api/model-info`.

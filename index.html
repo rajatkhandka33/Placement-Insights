@@ -472,11 +472,365 @@
         color: var(--muted);
       }
 
+      .auth-screen {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .auth-card {
+        width: min(1100px, 100%);
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        overflow: hidden;
+      }
+
+      .auth-hero {
+        padding: 34px;
+        color: white;
+        background: linear-gradient(
+          145deg,
+          #0f172a 0%,
+          #0f766e 55%,
+          #111827 100%
+        );
+      }
+
+      .auth-hero h1,
+      .auth-hero p {
+        color: white;
+      }
+
+      .auth-form-panel {
+        padding: 34px;
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .auth-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .auth-field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .auth-field small {
+        color: var(--muted);
+      }
+
+      .auth-tips {
+        margin-top: 18px;
+        padding-left: 18px;
+        line-height: 1.7;
+        color: #374151;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 290px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        min-height: 100vh;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.96);
+        color: white;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .brand-block {
+        padding-bottom: 18px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .brand-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+
+      .brand-subtitle {
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.72);
+        line-height: 1.6;
+      }
+
+      .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .role-admin {
+        background: rgba(15, 118, 110, 0.2);
+        color: #a7f3d0;
+      }
+
+      .role-student {
+        background: rgba(202, 138, 4, 0.2);
+        color: #fde68a;
+      }
+
+      .sidebar-nav {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .sidebar-link,
+      .sidebar-button {
+        width: 100%;
+        border: 0;
+        text-align: left;
+        border-radius: 16px;
+        padding: 13px 15px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .sidebar-link.active,
+      .sidebar-button.active {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-link:hover,
+      .sidebar-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .sidebar-meta {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: grid;
+        gap: 10px;
+      }
+
+      .sidebar-meta small {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .main-panel {
+        padding: 24px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .topbar h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2vw, 2.3rem);
+      }
+
+      .topbar-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .overview-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .overview-card,
+      .download-card,
+      .student-card,
+      .profile-card {
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--border);
+      }
+
+      .overview-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+
+      .overview-value {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .section-stack {
+        display: grid;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .dashboard-grid,
+      .analytics-grid,
+      .students-grid,
+      .downloads-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+
+      .analytics-grid,
+      .students-grid,
+      .downloads-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .section-card {
+        padding: 22px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--border);
+      }
+
+      .section-card h2 {
+        margin: 0 0 10px;
+      }
+
+      .section-card p {
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .download-actions,
+      .student-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .flat-button {
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+      }
+
+      .danger-button {
+        background: rgba(202, 138, 4, 0.12);
+        color: #92400e;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(31, 35, 40, 0.08);
+        text-align: left;
+      }
+
+      th {
+        background: rgba(15, 118, 110, 0.05);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .student-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .student-card {
+        display: grid;
+        gap: 10px;
+      }
+
+      .student-card strong {
+        font-size: 1rem;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, 0.1);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .section-empty {
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px dashed var(--border);
+        color: var(--muted);
+      }
+
+      .download-selector {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .status-line {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(15, 118, 110, 0.08);
+        color: #115e59;
+      }
+
       @media (max-width: 1080px) {
-        .hero,
-        .layout,
+        .auth-card,
+        .app-shell,
+        .dashboard-grid,
+        .analytics-grid,
+        .students-grid,
+        .downloads-grid,
+        .overview-grid,
         .cards-3 {
           grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          min-height: auto;
+          position: relative;
         }
       }
 
@@ -489,14 +843,24 @@
         .hero-side,
         .card,
         .section,
-        .footer {
+        .footer,
+        .main-panel,
+        .sidebar,
+        .auth-form-panel,
+        .auth-hero {
           padding: 18px;
         }
 
         .stat-grid,
         .form-grid,
-        .mini-grid {
+        .mini-grid,
+        .overview-grid {
           grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
         }
       }
     </style>
@@ -509,40 +873,336 @@
 
     <script type="text/babel">
       const { useEffect, useMemo, useState } = React;
+      const STORAGE_KEY = "placement-insights-session";
+
+      function parseRoute() {
+        const raw = window.location.hash.replace(/^#/, "") || "login";
+        const [page, param] = raw.split("/");
+        return { page: page || "login", param: param || "" };
+      }
+
+      async function requestJSON(url, token, options = {}) {
+        const headers = new Headers(options.headers || {});
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(
+            payload.detail || `Request failed with ${response.status}`,
+          );
+        }
+        return response.json();
+      }
+
+      async function requestBlob(url, token) {
+        const headers = new Headers();
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        const response = await fetch(url, { headers });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(
+            payload.detail || `Download failed with ${response.status}`,
+          );
+        }
+        return response.blob();
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function formatValue(value, fallback = "-") {
+        if (value === null || value === undefined || value === "") {
+          return fallback;
+        }
+        if (typeof value === "number") {
+          return Number.isInteger(value) ? value.toString() : value.toFixed(2);
+        }
+        return value;
+      }
 
       function App() {
-        const [siteData, setSiteData] = useState(null);
-        const [error, setError] = useState("");
-        const [form, setForm] = useState({
-          CGPA: 7.5,
-          Internships: 1,
-          Projects: 2,
-          Certifications: 1,
-          Communication_Skills: 72,
-          Aptitude_Score: 75,
-          Backlogs: 0,
+        const [route, setRoute] = useState(parseRoute());
+        const [token, setToken] = useState(
+          () => localStorage.getItem(STORAGE_KEY) || "",
+        );
+        const [user, setUser] = useState(null);
+        const [bootstrap, setBootstrap] = useState(null);
+        const [publicData, setPublicData] = useState(null);
+        const [students, setStudents] = useState([]);
+        const [selectedStudentId, setSelectedStudentId] = useState(null);
+        const [loginForm, setLoginForm] = useState({
+          username: "admin",
+          password: "admin123",
         });
-        const [result, setResult] = useState(null);
-        const [predicting, setPredicting] = useState(false);
+        const [loadingSession, setLoadingSession] = useState(Boolean(token));
+        const [loginError, setLoginError] = useState("");
+        const [pageError, setPageError] = useState("");
+        const [pageNotice, setPageNotice] = useState("");
+        const [busyDownload, setBusyDownload] = useState("");
+        const [studentQueryId, setStudentQueryId] = useState("");
+
+        const go = (value) => {
+          window.location.hash = `#${value}`;
+        };
+
+        const refreshPublic = async () => {
+          try {
+            const data = await requestJSON("/api/site-data");
+            setPublicData(data);
+          } catch (error) {
+            setPageError(error.message);
+          }
+        };
+
+        const refreshSession = async (sessionToken) => {
+          setLoadingSession(true);
+          try {
+            const data = await requestJSON("/api/bootstrap", sessionToken);
+            setBootstrap(data);
+            setUser(data.user);
+            setStudents(data.students || []);
+            const nextStudentId =
+              data.user?.role === "student"
+                ? data.user.student_id
+                : (data.students?.[0]?.student_id ?? null);
+            setSelectedStudentId(nextStudentId);
+            setStudentQueryId(nextStudentId ? String(nextStudentId) : "");
+            setPageError("");
+            setLoginError("");
+          } catch (error) {
+            localStorage.removeItem(STORAGE_KEY);
+            setToken("");
+            setUser(null);
+            setBootstrap(null);
+            setStudents([]);
+            setSelectedStudentId(null);
+            setStudentQueryId("");
+            setPageError(error.message);
+            go("login");
+          } finally {
+            setLoadingSession(false);
+          }
+        };
 
         useEffect(() => {
-          fetch("/api/site-data")
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Unable to load site data");
-              }
-              return response.json();
-            })
-            .then(setSiteData)
-            .catch((err) => setError(err.message));
+          refreshPublic();
+          const syncRoute = () => setRoute(parseRoute());
+          window.addEventListener("hashchange", syncRoute);
+          syncRoute();
+          return () => window.removeEventListener("hashchange", syncRoute);
         }, []);
 
-        const summary = siteData?.insights?.summary ?? {};
-        const project = siteData?.project ?? {};
-        const model = siteData?.model ?? {};
+        useEffect(() => {
+          if (token) {
+            refreshSession(token);
+          }
+        }, [token]);
 
-        const heroStats = useMemo(
+        useEffect(() => {
+          if (!user) {
+            if (route.page !== "login") {
+              go("login");
+            }
+            return;
+          }
+
+          if (route.page === "login") {
+            go("dashboard");
+          }
+
+          if (
+            user.role === "student" &&
+            ["analytics", "students"].includes(route.page)
+          ) {
+            go("dashboard");
+          }
+        }, [route.page, user]);
+
+        useEffect(() => {
+          if (route.page === "profile" && route.param) {
+            setSelectedStudentId(Number(route.param));
+          }
+        }, [route.page, route.param]);
+
+        const project = bootstrap?.project || publicData?.project || {};
+        const model = bootstrap?.model || publicData?.model || {};
+        const insights = bootstrap?.insights || publicData?.insights || {};
+        const summary = insights.summary || {};
+        const isAdmin = user?.role === "admin";
+        const isStudent = user?.role === "student";
+
+        const navItems = useMemo(() => {
+          if (isAdmin) {
+            return [
+              { page: "dashboard", label: "Dashboard" },
+              { page: "analytics", label: "Analytics" },
+              { page: "students", label: "Students" },
+              { page: "downloads", label: "Downloads" },
+            ];
+          }
+          return [
+            { page: "dashboard", label: "Dashboard" },
+            { page: "profile", label: "My Profile" },
+            { page: "downloads", label: "Downloads" },
+          ];
+        }, [isAdmin]);
+
+        const heroMetrics = useMemo(
           () => [
+            { label: "Total students", value: summary.total_students },
+            {
+              label: "Placement rate",
+              value: summary.placement_rate,
+              suffix: "%",
+            },
+            { label: "Average CGPA", value: summary.avg_cgpa },
+            { label: "Average aptitude", value: summary.avg_aptitude },
+          ],
+          [summary],
+        );
+
+        const selectedStudent = useMemo(() => {
+          if (!students.length) {
+            return null;
+          }
+          const id = Number(
+            selectedStudentId ||
+              route.param ||
+              user?.student_id ||
+              students[0]?.student_id,
+          );
+          return (
+            students.find((item) => Number(item.student_id) === id) ||
+            students[0] ||
+            null
+          );
+        }, [selectedStudentId, route.param, students, user]);
+
+        const renderBars = (
+          items,
+          valueKey = "placement_rate",
+          suffix = "%",
+        ) => {
+          if (!items?.length) {
+            return (
+              <div className="section-empty">
+                Not enough grouped data for this chart.
+              </div>
+            );
+          }
+
+          const max = Math.max(
+            ...items.map((item) => Math.abs(item[valueKey] ?? item.delta ?? 0)),
+            1,
+          );
+
+          return (
+            <div className="bars">
+              {items.map((item) => {
+                const rawValue = item[valueKey] ?? item.delta ?? 0;
+                const width = Math.max(8, (Math.abs(rawValue) / max) * 100);
+                const labelValue =
+                  item.placement_rate !== undefined
+                    ? `${item.placement_rate}%`
+                    : `${item.delta >= 0 ? "+" : ""}${item.delta}`;
+
+                return (
+                  <div className="bar-row" key={item.label}>
+                    <div className="bar-head">
+                      <strong>{item.label}</strong>
+                      <span>
+                        {labelValue} {suffix}
+                      </span>
+                    </div>
+                    <div className="bar-track">
+                      <div
+                        className="bar-fill"
+                        style={{ width: `${width}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        };
+
+        const logout = async () => {
+          try {
+            if (token) {
+              await requestJSON("/api/auth/logout", token, { method: "POST" });
+            }
+          } catch (error) {
+            setPageNotice(error.message);
+          } finally {
+            localStorage.removeItem(STORAGE_KEY);
+            setToken("");
+            setUser(null);
+            setBootstrap(null);
+            setStudents([]);
+            setSelectedStudentId(null);
+            setStudentQueryId("");
+            go("login");
+          }
+        };
+
+        const login = async (event) => {
+          event.preventDefault();
+          setLoginError("");
+          setPageError("");
+          try {
+            const payload = await requestJSON("/api/auth/login", null, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(loginForm),
+            });
+            localStorage.setItem(STORAGE_KEY, payload.token);
+            setToken(payload.token);
+            await refreshSession(payload.token);
+            go("dashboard");
+          } catch (error) {
+            setLoginError(error.message);
+          }
+        };
+
+        const downloadCsv = async (endpoint, filename) => {
+          setBusyDownload(filename);
+          try {
+            const blob = await requestBlob(endpoint, token);
+            downloadBlob(blob, filename);
+            setPageNotice(`Downloaded ${filename}`);
+          } catch (error) {
+            setPageError(error.message);
+          } finally {
+            setBusyDownload("");
+          }
+        };
+
+        const roleLabel = isAdmin
+          ? "Administrator"
+          : isStudent
+            ? "Student"
+            : "Visitor";
+        const accessLabel = isAdmin
+          ? "Full access"
+          : isStudent
+            ? "Personal profile access"
+            : "Limited access";
+
+        if (!user) {
+          const demoCards = [
             {
               label: "Total students",
               value: summary.total_students?.toLocaleString?.() ?? "...",
@@ -554,426 +1214,698 @@
                   ? `${summary.placement_rate}%`
                   : "...",
             },
-            { label: "Average CGPA", value: summary.avg_cgpa ?? "..." },
-            { label: "Average aptitude", value: summary.avg_aptitude ?? "..." },
-          ],
-          [summary],
-        );
-
-        const setField = (field, value) => {
-          setForm((current) => ({ ...current, [field]: value }));
-        };
-
-        const resetForm = () => {
-          setForm({
-            CGPA: 7.5,
-            Internships: 1,
-            Projects: 2,
-            Certifications: 1,
-            Communication_Skills: 72,
-            Aptitude_Score: 75,
-            Backlogs: 0,
-          });
-          setResult(null);
-        };
-
-        const renderBars = (
-          items,
-          valueKey = "placement_rate",
-          suffix = "%",
-        ) => {
-          if (!items?.length) {
-            return (
-              <div className="muted">
-                Not enough grouped data for this chart.
-              </div>
-            );
-          }
-
-          const max = Math.max(
-            ...items.map((item) => Math.abs(item[valueKey] ?? item.delta ?? 0)),
-            1,
-          );
-
-          return items.map((item) => {
-            const rawValue = item[valueKey] ?? item.delta ?? 0;
-            const width = Math.max(8, (Math.abs(rawValue) / max) * 100);
-            const labelValue =
-              item.placement_rate !== undefined
-                ? `${item.placement_rate}%`
-                : `${item.delta >= 0 ? "+" : ""}${item.delta}`;
-
-            return (
-              <div className="bar-row" key={item.label}>
-                <div className="bar-head">
-                  <strong>{item.label}</strong>
-                  <span>
-                    {labelValue} {suffix}
-                  </span>
-                </div>
-                <div className="bar-track">
-                  <div
-                    className="bar-fill"
-                    style={{ width: `${width}%` }}
-                  ></div>
-                </div>
-              </div>
-            );
-          });
-        };
-
-        const renderResult = () => {
-          if (!result) {
-            return (
-              <div className="muted">
-                Run a prediction to see placement outcome, readiness score, and
-                recommendations.
-              </div>
-            );
-          }
-
-          const placed = result.result === "Placed";
-          const probability =
-            result.probability === null ? "N/A" : `${result.probability}%`;
+            { label: "Model", value: model.algorithm || "Loading..." },
+            { label: "Role access", value: "Student / Admin" },
+          ];
 
           return (
-            <>
-              <div
-                className={`result-pill ${placed ? "placed" : "not-placed"}`}
-              >
-                {result.result}
-              </div>
-              <div className="mini-grid">
-                <div className="mini">
-                  <div className="mini-label">Probability</div>
-                  <div className="mini-value">{probability}</div>
+            <div className="auth-screen">
+              <div className="panel auth-card">
+                <div className="auth-hero">
+                  <div className="eyebrow">Smart Placement and Insights</div>
+                  <h1>Login to your role-based placement portal.</h1>
+                  <p className="hero-copy">
+                    Students can see their own profile, placement readiness, and
+                    downloads. Admins can view the full dashboard, analytics,
+                    student list, and CSV exports.
+                  </p>
+                  <div className="overview-grid" style={{ marginTop: 18 }}>
+                    {demoCards.map((item) => (
+                      <div className="overview-card" key={item.label}>
+                        <div className="overview-label">{item.label}</div>
+                        <div
+                          className="overview-value"
+                          style={{ color: "white" }}
+                        >
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <ul className="auth-tips">
+                    <li>Use the seeded demo accounts to start quickly.</li>
+                    <li>The app stays fully local after cloning the repo.</li>
+                    <li>
+                      Admins get access to analytics and dataset downloads.
+                    </li>
+                  </ul>
                 </div>
-                <div className="mini">
-                  <div className="mini-label">Readiness score</div>
-                  <div className="mini-value">{result.readiness_score}/100</div>
+
+                <div className="auth-form-panel">
+                  <div className="section-title">
+                    <h2>Sign in</h2>
+                    <span>Local role-based access</span>
+                  </div>
+                  <form className="auth-form" onSubmit={login}>
+                    <label className="auth-field">
+                      Username
+                      <input
+                        type="text"
+                        value={loginForm.username}
+                        onChange={(event) =>
+                          setLoginForm((current) => ({
+                            ...current,
+                            username: event.target.value,
+                          }))
+                        }
+                        placeholder="admin or student1"
+                      />
+                    </label>
+                    <label className="auth-field">
+                      Password
+                      <input
+                        type="password"
+                        value={loginForm.password}
+                        onChange={(event) =>
+                          setLoginForm((current) => ({
+                            ...current,
+                            password: event.target.value,
+                          }))
+                        }
+                        placeholder="admin123 or student123"
+                      />
+                    </label>
+                    <button className="primary" type="submit">
+                      {loadingSession ? "Checking session..." : "Login"}
+                    </button>
+                    {loginError ? (
+                      <div className="status-line">{loginError}</div>
+                    ) : null}
+                  </form>
+
+                  <div className="section-title" style={{ marginTop: 20 }}>
+                    <h2>Demo accounts</h2>
+                  </div>
+                  <div className="section-empty">
+                    <strong>Admin</strong>: `admin / admin123`
+                    <br />
+                    <strong>Student</strong>: `student1 / student123`
+                    <br />
+                    <strong>Student</strong>: `student2 / student123`
+                    <br />
+                    <strong>Student</strong>: `student3 / student123`
+                  </div>
+                  {pageError ? (
+                    <div className="status-line" style={{ marginTop: 14 }}>
+                      {pageError}
+                    </div>
+                  ) : null}
                 </div>
               </div>
-              <div style={{ marginTop: 14, fontWeight: 700 }}>
-                Suggested roles
+            </div>
+          );
+        }
+
+        const page = route.page || "dashboard";
+        const resolvedProfile = selectedStudent;
+
+        const Dashboard = () => (
+          <div className="section-stack">
+            <div className="overview-grid">
+              {heroMetrics.map((item) => (
+                <div className="overview-card" key={item.label}>
+                  <div className="overview-label">{item.label}</div>
+                  <div className="overview-value">
+                    {item.value != null
+                      ? (item.value.toLocaleString?.() ?? item.value)
+                      : "..."}
+                    {item.suffix || ""}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="dashboard-grid">
+              <section className="section-card">
+                <div className="section-title">
+                  <h2>{isAdmin ? "Admin dashboard" : "My dashboard"}</h2>
+                  <span>{roleLabel}</span>
+                </div>
+                <p>
+                  {isAdmin
+                    ? "Use this dashboard to monitor placement performance, browse students, and export dataset reports."
+                    : "Use this dashboard to review your own placement profile, readiness score, and personalized guidance."}
+                </p>
+                <div className="pill-row">
+                  <span className="pill">{accessLabel}</span>
+                  <span className="pill">
+                    {model.algorithm || "Saved model"}
+                  </span>
+                  <span className="pill">{model.target || "Placement"}</span>
+                </div>
+                <div className="download-actions">
+                  <button
+                    className="flat-button"
+                    type="button"
+                    onClick={() => go("downloads")}
+                  >
+                    Open downloads
+                  </button>
+                  {isAdmin ? (
+                    <button
+                      className="flat-button"
+                      type="button"
+                      onClick={() => go("analytics")}
+                    >
+                      View analytics
+                    </button>
+                  ) : (
+                    <button
+                      className="flat-button"
+                      type="button"
+                      onClick={() => go("profile")}
+                    >
+                      View my profile
+                    </button>
+                  )}
+                </div>
+              </section>
+
+              <section className="section-card">
+                <div className="section-title">
+                  <h2>{isAdmin ? "Access summary" : "Profile summary"}</h2>
+                </div>
+                {isAdmin ? (
+                  <>
+                    <div className="mini-grid">
+                      <div className="mini">
+                        <div className="mini-label">Students</div>
+                        <div className="mini-value">{students.length}</div>
+                      </div>
+                      <div className="mini">
+                        <div className="mini-label">Top branch</div>
+                        <div className="mini-value">
+                          {insights.top_branches?.[0]?.label || "-"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="status-line">
+                      Admin users can review all students and export overall CSV
+                      reports.
+                    </div>
+                  </>
+                ) : resolvedProfile ? (
+                  <>
+                    <div className="mini-grid">
+                      <div className="mini">
+                        <div className="mini-label">Placement</div>
+                        <div className="mini-value">
+                          {resolvedProfile.placement}
+                        </div>
+                      </div>
+                      <div className="mini">
+                        <div className="mini-label">Probability</div>
+                        <div className="mini-value">
+                          {formatValue(resolvedProfile.probability, "N/A")}%
+                        </div>
+                      </div>
+                      <div className="mini">
+                        <div className="mini-label">Readiness</div>
+                        <div className="mini-value">
+                          {formatValue(resolvedProfile.readiness_score, "N/A")}
+                          /100
+                        </div>
+                      </div>
+                      <div className="mini">
+                        <div className="mini-label">Student ID</div>
+                        <div className="mini-value">
+                          {formatValue(resolvedProfile.student_id)}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="section-empty">No profile loaded yet.</div>
+                )}
+              </section>
+            </div>
+          </div>
+        );
+
+        const Analytics = () => (
+          <div className="analytics-grid">
+            <section className="section-card">
+              <div className="section-title">
+                <h2>Overall placement trends</h2>
+                <span>Branches and tier performance</span>
               </div>
-              <ul className="list-block">
-                {result.recommendation.map((item) => (
-                  <li key={item}>{item}</li>
+              {renderBars(insights.top_branches || [])}
+              <div style={{ height: 18 }}></div>
+              {renderBars(insights.college_tiers || [])}
+            </section>
+
+            <section className="section-card">
+              <div className="section-title">
+                <h2>Key placement drivers</h2>
+                <span>Placed vs not placed gaps</span>
+              </div>
+              {renderBars(insights.key_drivers || [], "delta", "gap")}
+              <div style={{ height: 18 }}></div>
+              <div className="section-title">
+                <h2>Model importance</h2>
+                <span>{model.algorithm || "Model"}</span>
+              </div>
+              {renderBars(
+                (model.top_importances || []).map((item) => ({
+                  label: item.label,
+                  delta: item.score,
+                })),
+                "delta",
+                "importance",
+              )}
+            </section>
+          </div>
+        );
+
+        const Students = () => (
+          <div className="students-grid">
+            <section className="section-card">
+              <div className="section-title">
+                <h2>Student section</h2>
+                <span>Seeded local profiles</span>
+              </div>
+              <div className="student-list">
+                {students.length ? (
+                  students.map((student) => (
+                    <div className="student-card" key={student.student_id}>
+                      <strong>
+                        {student.display_name || student.username}
+                      </strong>
+                      <div className="pill-row">
+                        <span className="pill">ID {student.student_id}</span>
+                        <span className="pill">
+                          {student.branch || "Unknown branch"}
+                        </span>
+                        <span className="pill">{student.placement}</span>
+                      </div>
+                      <div className="student-actions">
+                        <button
+                          className="flat-button"
+                          type="button"
+                          onClick={() => go(`profile/${student.student_id}`)}
+                        >
+                          Open profile
+                        </button>
+                        <button
+                          className="flat-button"
+                          type="button"
+                          onClick={() =>
+                            downloadCsv(
+                              `/api/download/student.csv?student_id=${student.student_id}`,
+                              `student_${student.student_id}.csv`,
+                            )
+                          }
+                        >
+                          Download CSV
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="section-empty">
+                    No student profiles loaded yet.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="section-card">
+              <div className="section-title">
+                <h2>Profile viewer</h2>
+                <span>Admin can inspect an individual student</span>
+              </div>
+              {isAdmin ? (
+                <div className="download-selector">
+                  <label className="auth-field">
+                    Choose student
+                    <select
+                      value={selectedStudentId || ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setSelectedStudentId(value ? Number(value) : null);
+                        if (value) {
+                          go(`profile/${value}`);
+                        }
+                      }}
+                    >
+                      <option value="">Select a profile</option>
+                      {students.map((student) => (
+                        <option
+                          key={student.student_id}
+                          value={student.student_id}
+                        >
+                          {student.display_name || student.username} (ID{" "}
+                          {student.student_id})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {resolvedProfile ? (
+                    <div className="profile-card">
+                      <div className="section-title">
+                        <h2>
+                          {resolvedProfile.display_name ||
+                            resolvedProfile.username ||
+                            `Student ${resolvedProfile.student_id}`}
+                        </h2>
+                        <span>Student ID {resolvedProfile.student_id}</span>
+                      </div>
+                      <div className="mini-grid">
+                        <div className="mini">
+                          <div className="mini-label">CGPA</div>
+                          <div className="mini-value">
+                            {formatValue(resolvedProfile.profile?.CGPA)}
+                          </div>
+                        </div>
+                        <div className="mini">
+                          <div className="mini-label">Internships</div>
+                          <div className="mini-value">
+                            {formatValue(resolvedProfile.profile?.Internships)}
+                          </div>
+                        </div>
+                        <div className="mini">
+                          <div className="mini-label">Projects</div>
+                          <div className="mini-value">
+                            {formatValue(resolvedProfile.profile?.Projects)}
+                          </div>
+                        </div>
+                        <div className="mini">
+                          <div className="mini-label">Backlogs</div>
+                          <div className="mini-value">
+                            {formatValue(resolvedProfile.profile?.Backlogs)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="section-empty">
+                      Select a student to inspect the profile.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="section-empty">
+                  Students can only see their own profile here.
+                </div>
+              )}
+            </section>
+          </div>
+        );
+
+        const Profile = () => {
+          const profile = isStudent ? students[0] : resolvedProfile;
+          if (!profile) {
+            return <div className="section-empty">No profile selected.</div>;
+          }
+
+          return (
+            <div className="section-card">
+              <div className="section-title">
+                <h2>
+                  {profile.display_name ||
+                    profile.username ||
+                    `Student ${profile.student_id}`}
+                </h2>
+                <span>{profile.branch || "Profile"}</span>
+              </div>
+              <div className="overview-grid">
+                <div className="overview-card">
+                  <div className="overview-label">Placement</div>
+                  <div className="overview-value">{profile.placement}</div>
+                </div>
+                <div className="overview-card">
+                  <div className="overview-label">Probability</div>
+                  <div className="overview-value">
+                    {formatValue(profile.probability, "N/A")}%
+                  </div>
+                </div>
+                <div className="overview-card">
+                  <div className="overview-label">Readiness</div>
+                  <div className="overview-value">
+                    {formatValue(profile.readiness_score, "N/A")}
+                  </div>
+                </div>
+                <div className="overview-card">
+                  <div className="overview-label">Student ID</div>
+                  <div className="overview-value">
+                    {formatValue(profile.student_id)}
+                  </div>
+                </div>
+              </div>
+              <div className="mini-grid" style={{ marginTop: 18 }}>
+                {Object.entries(profile.profile || {}).map(([key, value]) => (
+                  <div className="mini" key={key}>
+                    <div className="mini-label">{key.replace(/_/g, " ")}</div>
+                    <div className="mini-value">{formatValue(value)}</div>
+                  </div>
                 ))}
-              </ul>
-              <div style={{ marginTop: 14, fontWeight: 700 }}>Next steps</div>
-              <ul className="list-block">
-                {result.next_steps.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </>
+              </div>
+            </div>
           );
         };
 
-        const predict = async (event) => {
-          event.preventDefault();
-          setPredicting(true);
-          setResult(null);
-
-          try {
-            const response = await fetch("/api/predict", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(form),
-            });
-
-            if (!response.ok) {
-              const payload = await response.json().catch(() => ({}));
-              throw new Error(payload.detail || "Prediction failed");
-            }
-
-            setResult(await response.json());
-          } catch (err) {
-            setResult({
-              result: "Not Placed",
-              probability: null,
-              readiness_score: 0,
-              recommendation: [err.message],
-              next_steps: [
-                "Check the backend API",
-                "Reload the page",
-                "Confirm the model file exists",
-              ],
-            });
-          } finally {
-            setPredicting(false);
-          }
-        };
-
-        const projectChips = [
-          ...(project.tech_stack?.frontend ?? []).map((item) => ({
-            group: "frontend",
-            value: item,
-          })),
-          ...(project.tech_stack?.backend ?? []).map((item) => ({
-            group: "backend",
-            value: item,
-          })),
-          ...(project.tech_stack?.ml ?? []).map((item) => ({
-            group: "ml",
-            value: item,
-          })),
-          ...(project.tech_stack?.data ?? []).map((item) => ({
-            group: "data",
-            value: item,
-          })),
-        ];
-
-        return (
-          <main className="wrap">
-            <section className="hero">
-              <div className="panel hero-main">
-                <div className="eyebrow">Smart Placement and Insights</div>
-                <h1>
-                  Placement intelligence built from the research paper, poster,
-                  and dataset.
-                </h1>
-                <p className="hero-copy">
-                  This React website combines a trained AI/ML model with
-                  dataset-level analysis to predict placement outcomes, explain
-                  the strongest drivers, and turn the project into a complete
-                  interactive presentation.
-                </p>
-                <div className="hero-actions">
-                  <a className="hero-link primary-link" href="#predictor">
-                    Try the predictor
-                  </a>
-                  <a className="hero-link ghost-link" href="#insights">
-                    View insights
-                  </a>
-                </div>
-                <div className="stat-grid">
-                  {heroStats.map((item) => (
-                    <div className="stat" key={item.label}>
-                      <div className="label">{item.label}</div>
-                      <div className="value">{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <aside className="panel hero-side">
+        const Downloads = () => {
+          const adminStudentId =
+            selectedStudentId || students[0]?.student_id || "";
+          return (
+            <div className="downloads-grid">
+              <section className="section-card">
                 <div className="section-title">
-                  <h2>Project focus</h2>
+                  <h2>Download section</h2>
+                  <span>CSV exports</span>
                 </div>
-                <div className="side-note">
-                  {project.summary || "Loading project summary..."}
-                </div>
-                <div className="workflow">
-                  {(project.features || []).map((feature, index) => (
-                    <div className="workflow-step" key={feature}>
-                      <strong>
-                        {index + 1}. {feature}
-                      </strong>
-                      <span className="muted">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mini-grid">
-                  <div className="mini">
-                    <div className="mini-label">Model</div>
-                    <div className="mini-value">
-                      {model.algorithm || "Loading..."}
-                    </div>
-                  </div>
-                  <div className="mini">
-                    <div className="mini-label">Input features</div>
-                    <div className="mini-value">7</div>
-                  </div>
-                  <div className="mini">
-                    <div className="mini-label">Data rows</div>
-                    <div className="mini-value">
-                      {summary.total_students
-                        ? summary.total_students.toLocaleString()
-                        : "..."}
-                    </div>
-                  </div>
-                  <div className="mini">
-                    <div className="mini-label">Stack</div>
-                    <div className="mini-value">FastAPI + React</div>
-                  </div>
-                </div>
-              </aside>
-            </section>
-
-            <section className="panel section" id="overview">
-              <div className="section-title">
-                <h2>Research blueprint</h2>
-                <span>Aligned with the paper and poster</span>
-              </div>
-              <div className="cards-3">
-                {(project.objectives || []).map((objective, index) => (
-                  <div className="info-card" key={objective}>
-                    <h3>Objective {index + 1}</h3>
-                    <p>{objective}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="chip-row">
-                {projectChips.map((chip) => (
-                  <span className="chip" key={`${chip.group}-${chip.value}`}>
-                    {chip.group}: {chip.value}
-                  </span>
-                ))}
-              </div>
-            </section>
-
-            <section className="layout" id="predictor">
-              <div className="panel card">
-                <div className="section-title">
-                  <h2>Placement predictor</h2>
-                  <span>Same core features used by the trained model</span>
-                </div>
-                <form onSubmit={predict}>
-                  <div className="form-grid">
-                    {[
-                      ["CGPA", 10],
-                      ["Internships", 1],
-                      ["Projects", 1],
-                      ["Certifications", 1],
-                      ["Communication_Skills", 0.1],
-                      ["Aptitude_Score", 0.1],
-                      ["Backlogs", 1],
-                    ].map(([field, step]) => (
-                      <label key={field}>
-                        {field.replace(/_/g, " ")}
-                        <input
-                          type="number"
-                          step={step}
-                          min={0}
-                          max={field === "CGPA" ? 10 : 100}
-                          value={form[field]}
-                          onChange={(event) =>
-                            setField(field, Number(event.target.value))
-                          }
-                        />
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="actions">
+                <div className="download-actions">
+                  {isAdmin ? (
                     <button
                       className="primary"
-                      type="submit"
-                      disabled={predicting}
-                    >
-                      {predicting ? "Predicting..." : "Predict Placement"}
-                    </button>
-                    <button
-                      className="secondary"
                       type="button"
-                      onClick={resetForm}
+                      onClick={() =>
+                        downloadCsv(
+                          "/api/download/overall.csv",
+                          "overall_statistics.csv",
+                        )
+                      }
+                      disabled={busyDownload === "overall_statistics.csv"}
                     >
-                      Reset
+                      {busyDownload === "overall_statistics.csv"
+                        ? "Downloading..."
+                        : "Overall statistics CSV"}
                     </button>
+                  ) : null}
+                  <button
+                    className="flat-button"
+                    type="button"
+                    onClick={() =>
+                      downloadCsv(
+                        `/api/download/student.csv${isAdmin && adminStudentId ? `?student_id=${adminStudentId}` : ""}`,
+                        `student_${adminStudentId || user.student_id}.csv`,
+                      )
+                    }
+                    disabled={!isAdmin && !user}
+                  >
+                    {isStudent ? "My profile CSV" : "Student CSV"}
+                  </button>
+                  {isAdmin ? (
+                    <>
+                      <button
+                        className="flat-button"
+                        type="button"
+                        onClick={() =>
+                          downloadCsv(
+                            "/api/download/dataset.csv",
+                            "placement_dataset.csv",
+                          )
+                        }
+                        disabled={busyDownload === "placement_dataset.csv"}
+                      >
+                        Raw dataset CSV
+                      </button>
+                      <button
+                        className="flat-button"
+                        type="button"
+                        onClick={() =>
+                          downloadCsv(
+                            "/api/download/predictions.csv",
+                            "dataset_predictions.csv",
+                          )
+                        }
+                        disabled={busyDownload === "dataset_predictions.csv"}
+                      >
+                        Predictions CSV
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+                {isAdmin ? (
+                  <div className="download-selector">
+                    <label className="auth-field">
+                      Student to export
+                      <select
+                        value={adminStudentId}
+                        onChange={(event) =>
+                          setSelectedStudentId(Number(event.target.value))
+                        }
+                      >
+                        {students.map((student) => (
+                          <option
+                            key={student.student_id}
+                            value={student.student_id}
+                          >
+                            {student.display_name || student.username} (ID{" "}
+                            {student.student_id})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
-                </form>
+                ) : (
+                  <div className="section-empty" style={{ marginTop: 14 }}>
+                    Students can export only their own profile CSV.
+                  </div>
+                )}
+              </section>
 
-                <div className="result-box">{renderResult()}</div>
-
-                <div className="section-title" style={{ marginTop: 20 }}>
-                  <h2>How the website uses AI/ML</h2>
-                </div>
-                <div className="workflow-step">
-                  <strong>Model prediction</strong>
-                  The backend feeds the seven core placement features into the
-                  saved model and returns a placement outcome, confidence, and
-                  readiness score.
-                </div>
-                <div className="workflow-step" style={{ marginTop: 12 }}>
-                  <strong>Actionable guidance</strong>
-                  The response includes role suggestions and next steps so the
-                  result is useful beyond a single yes/no prediction.
-                </div>
-              </div>
-
-              <div className="panel card" id="insights">
+              <section className="section-card">
                 <div className="section-title">
-                  <h2>Dataset and model insights</h2>
-                  <span>What the report and poster emphasize</span>
+                  <h2>Export summary</h2>
+                  <span>{roleLabel}</span>
                 </div>
-                <div className="bars">
-                  {renderBars(
-                    siteData?.insights?.top_branches,
-                    "placement_rate",
-                    "%",
-                  )}
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Access</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Overall statistics CSV</td>
+                        <td>{isAdmin ? "Allowed" : "Admin only"}</td>
+                      </tr>
+                      <tr>
+                        <td>Per-student CSV</td>
+                        <td>{user ? "Allowed" : "Login required"}</td>
+                      </tr>
+                      <tr>
+                        <td>Raw dataset CSV</td>
+                        <td>{isAdmin ? "Allowed" : "Admin only"}</td>
+                      </tr>
+                      <tr>
+                        <td>Predictions CSV</td>
+                        <td>{isAdmin ? "Allowed" : "Admin only"}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <div className="bars">
-                  {renderBars(
-                    siteData?.insights?.college_tiers,
-                    "placement_rate",
-                    "%",
-                  )}
-                </div>
-                <div className="bars">
-                  {renderBars(siteData?.insights?.key_drivers, "delta", "gap")}
-                </div>
-                <div className="bars">
-                  {renderBars(
-                    model.top_importances?.map((item) => ({
-                      label: item.label,
-                      delta: item.score,
-                    })),
-                    "placement_rate",
-                    "importance",
-                  )}
-                </div>
-              </div>
-            </section>
+              </section>
+            </div>
+          );
+        };
 
-            <section className="panel section">
-              <div className="section-title">
-                <h2>Project modules</h2>
-                <span>Complete flow from data to deployment</span>
-              </div>
-              <div className="cards-3">
-                <div className="info-card">
-                  <h3>Data ingestion</h3>
-                  <p>
-                    Reads the bundled placement dataset and computes placement
-                    rate, feature gaps, and group-level trends.
-                  </p>
-                </div>
-                <div className="info-card">
-                  <h3>ML inference</h3>
-                  <p>
-                    Loads the saved model from disk through joblib and predicts
-                    placement from the core student profile features.
-                  </p>
-                </div>
-                <div className="info-card">
-                  <h3>Web presentation</h3>
-                  <p>
-                    Uses React in the browser and FastAPI on the server so the
-                    project behaves like a full website.
-                  </p>
-                </div>
-              </div>
-            </section>
+        const navHeader = (
+          <div className="brand-block">
+            <div className="brand-title">Smart Placement</div>
+            <div className="brand-subtitle">
+              Role-based portal for the placement research project.
+            </div>
+            <div
+              className={`role-badge ${isAdmin ? "role-admin" : "role-student"}`}
+            >
+              {roleLabel} · {accessLabel}
+            </div>
+          </div>
+        );
 
-            <section className="panel footer">
-              <div>
-                <strong>Smart Placement and Insights</strong>
-                <br />
-                <small>
-                  Built as a FastAPI + React AI/ML website for the placement
-                  research project.
-                </small>
+        return (
+          <div className="app-shell">
+            <aside className="sidebar">
+              {navHeader}
+              <nav className="sidebar-nav">
+                {navItems.map((item) => (
+                  <button
+                    key={item.page}
+                    className={`sidebar-button ${route.page === item.page ? "active" : ""}`}
+                    type="button"
+                    onClick={() => go(item.page)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+              <div className="sidebar-meta">
+                <small>{user.display_name || user.username}</small>
+                <small>{user.username}</small>
+                <small>{model.algorithm || "XGBClassifier"}</small>
+                <button
+                  className="sidebar-button"
+                  type="button"
+                  onClick={logout}
+                >
+                  Logout
+                </button>
               </div>
-              <small>
-                {siteData
-                  ? `Model: ${model.algorithm || "unknown"} | Target: ${model.target || "Placement"}`
-                  : error || "Loading site data..."}
-              </small>
-            </section>
-          </main>
+            </aside>
+
+            <main className="main-panel">
+              <div className="topbar">
+                <div>
+                  <div className="eyebrow">{page.toUpperCase()}</div>
+                  <h1>{isAdmin ? "Admin console" : "Student portal"}</h1>
+                  <p className="muted">
+                    {isAdmin
+                      ? "Monitor placement trends, review student profiles, and export dataset reports."
+                      : "Review your personal placement profile and download your CSV record."}
+                  </p>
+                </div>
+                <div className="topbar-actions">
+                  <button
+                    className="flat-button"
+                    type="button"
+                    onClick={() => go("dashboard")}
+                  >
+                    Dashboard
+                  </button>
+                  {isAdmin ? (
+                    <button
+                      className="flat-button"
+                      type="button"
+                      onClick={() => go("analytics")}
+                    >
+                      Analytics
+                    </button>
+                  ) : null}
+                  <button
+                    className="flat-button"
+                    type="button"
+                    onClick={logout}
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+
+              {loadingSession ? (
+                <div className="section-empty">Loading your session...</div>
+              ) : null}
+              {pageError ? (
+                <div className="status-line" style={{ marginBottom: 18 }}>
+                  {pageError}
+                </div>
+              ) : null}
+              {pageNotice ? (
+                <div className="status-line" style={{ marginBottom: 18 }}>
+                  {pageNotice}
+                </div>
+              ) : null}
+
+              {page === "dashboard" ? <Dashboard /> : null}
+              {page === "analytics" && isAdmin ? <Analytics /> : null}
+              {page === "students" && isAdmin ? <Students /> : null}
+              {page === "profile" ? <Profile /> : null}
+              {page === "downloads" ? <Downloads /> : null}
+            </main>
+          </div>
         );
       }
 

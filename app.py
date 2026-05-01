@@ -1,13 +1,17 @@
 from collections import Counter, defaultdict
-from csv import DictReader
+from csv import DictReader, DictWriter
+from io import StringIO
+import json
 from pathlib import Path
 from statistics import mean
+from typing import Any, Dict, List, Optional
+from uuid import uuid4
 
 import joblib
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 import pandas as pd
 
@@ -15,6 +19,7 @@ import pandas as pd
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "output" / "model.pkl"
 DATASET_PATH = BASE_DIR / "output" / "final_dataset.csv"
+USERS_PATH = BASE_DIR / "data" / "users.json"
 FEATURE_NAMES = [
     "CGPA",
     "Internships",
@@ -52,6 +57,36 @@ PROJECT_OVERVIEW = {
     ],
 }
 
+DEFAULT_USERS = [
+    {
+        "username": "admin",
+        "password": "admin123",
+        "role": "admin",
+        "display_name": "Placement Admin",
+    },
+    {
+        "username": "student1",
+        "password": "student123",
+        "role": "student",
+        "student_id": 1,
+        "display_name": "Student One",
+    },
+    {
+        "username": "student2",
+        "password": "student123",
+        "role": "student",
+        "student_id": 2,
+        "display_name": "Student Two",
+    },
+    {
+        "username": "student3",
+        "password": "student123",
+        "role": "student",
+        "student_id": 3,
+        "display_name": "Student Three",
+    },
+]
+
 app = FastAPI(title="Smart Placement and Insights", version="1.0.0")
 
 app.add_middleware(
@@ -61,6 +96,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+SESSIONS: Dict[str, Dict[str, Any]] = {}
 
 
 def load_model():
@@ -107,6 +145,36 @@ def load_rows():
         raise FileNotFoundError(f"Missing dataset file: {DATASET_PATH}")
     with DATASET_PATH.open("r", encoding="utf-8-sig", newline="") as handle:
         return list(DictReader(handle))
+
+
+def load_users():
+    if USERS_PATH.exists():
+        try:
+            with USERS_PATH.open("r", encoding="utf-8") as handle:
+                users = json.load(handle)
+                if isinstance(users, list) and users:
+                    return users
+        except Exception:
+            pass
+    return DEFAULT_USERS
+
+
+def normalize_student_id(value):
+    try:
+        if value is None or value == "":
+            return None
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def build_student_index(rows):
+    student_index = {}
+    for row in rows:
+        student_id = normalize_student_id(row.get("student_id") or row.get("StudentID"))
+        if student_id is not None:
+            student_index[student_id] = row
+    return student_index
 
 
 def to_float(value):
@@ -319,6 +387,218 @@ def build_model_info(model):
     return info
 
 
+def get_user_public(user):
+    return {
+        "username": user["username"],
+        "role": user["role"],
+        "display_name": user.get("display_name") or user["username"],
+        "student_id": user.get("student_id"),
+    }
+
+
+def load_user_index():
+    return {user["username"]: user for user in load_users()}
+
+
+USER_INDEX = load_user_index()
+
+
+def get_current_user(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    token = authorization.split(" ", 1)[1].strip()
+    session = SESSIONS.get(token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    return session
+
+
+def require_admin(user = Depends(get_current_user)):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
+def get_row_for_student(student_id):
+    return STUDENT_INDEX.get(normalize_student_id(student_id))
+
+
+def csv_response(filename, csv_text):
+    return Response(
+        content=csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+def core_vector_from_values(cgpa, internships, projects, certifications, communication_skills, aptitude_score, backlogs):
+    return np.array(
+        [[
+            float(cgpa),
+            float(internships),
+            float(projects),
+            float(certifications),
+            float(communication_skills),
+            float(aptitude_score),
+            float(backlogs),
+        ]],
+        dtype=float,
+    )
+
+
+def model_predict_from_vector(vector):
+    features = vector
+    try:
+        prediction = model.predict(features)[0]
+    except ValueError as ve:
+        message = str(ve)
+        import re
+
+        match = re.search(r"expected:\s*(\d+),\s*got\s*(\d+)", message)
+        if not match:
+            raise ve
+        expected = int(match.group(1))
+        got = int(match.group(2))
+        if got >= expected:
+            raise ve
+        padded = np.concatenate([features, np.zeros((1, expected - got), dtype=float)], axis=1)
+        prediction = model.predict(padded)[0]
+        features = padded
+
+    probability = None
+    if hasattr(model, "predict_proba"):
+        try:
+            proba_values = model.predict_proba(features)[0]
+            positive_index = 1
+            if hasattr(model, "classes_"):
+                classes = list(model.classes_)
+                for candidate in (1, "1", True, "Placed", "placed", "Yes", "yes"):
+                    if candidate in classes:
+                        positive_index = classes.index(candidate)
+                        break
+            probability = float(proba_values[positive_index])
+        except Exception:
+            probability = None
+
+    if isinstance(prediction, str):
+        result_label = "Placed" if prediction.strip().lower() in {"1", "true", "yes", "placed"} else "Not Placed"
+    else:
+        result_label = "Placed" if int(prediction) == 1 else "Not Placed"
+
+    return result_label, probability
+
+
+def predict_row(row):
+    vector = core_vector_from_values(
+        row.get("CGPA", 0),
+        row.get("Internships", 0),
+        row.get("Projects", 0),
+        row.get("Certifications", 0),
+        row.get("Communication_Skills", 0),
+        row.get("Aptitude_Score", 0),
+        row.get("Backlogs", 0),
+    )
+    return model_predict_from_vector(vector)
+
+
+def build_student_profile(row):
+    result_label, probability = predict_row(row)
+    student_id = normalize_student_id(row.get("student_id") or row.get("StudentID"))
+    return {
+        "student_id": student_id,
+        "branch": row.get("branch") or row.get("Core_Subjects"),
+        "college_tier": row.get("college_tier") or row.get("company_type"),
+        "placement": result_label,
+        "probability": round(probability * 100, 2) if probability is not None else None,
+        "readiness_score": round(
+            min(to_float(row.get("CGPA")) or 0, 10.0) * 8.0
+            + min(to_float(row.get("Internships")) or 0, 6.0) * 7.0
+            + min(to_float(row.get("Projects")) or 0, 8.0) * 6.0
+            + min(to_float(row.get("Certifications")) or 0, 8.0) * 4.5
+            + min(to_float(row.get("Communication_Skills")) or 0, 100.0) * 0.2
+            + min(to_float(row.get("Aptitude_Score")) or 0, 100.0) * 0.22
+            - min(to_float(row.get("Backlogs")) or 0, 10.0) * 8.0,
+            1,
+        ),
+        "profile": {
+            "CGPA": to_float(row.get("CGPA")),
+            "Internships": to_float(row.get("Internships")),
+            "Projects": to_float(row.get("Projects")),
+            "Certifications": to_float(row.get("Certifications")),
+            "Communication_Skills": to_float(row.get("Communication_Skills")),
+            "Aptitude_Score": to_float(row.get("Aptitude_Score")),
+            "Backlogs": to_float(row.get("Backlogs")),
+        },
+    }
+
+
+def overall_stats_csv():
+    buffer = StringIO()
+    writer = DictWriter(buffer, fieldnames=["section", "label", "metric", "value"])
+    writer.writeheader()
+    summary = insights["summary"]
+    for key, value in summary.items():
+        writer.writerow({"section": "summary", "label": "", "metric": key, "value": value})
+    for item in insights["top_branches"]:
+        writer.writerow({"section": "top_branch", "label": item["label"], "metric": "placement_rate", "value": item["placement_rate"]})
+    for item in insights["college_tiers"]:
+        writer.writerow({"section": "college_tier", "label": item["label"], "metric": "placement_rate", "value": item["placement_rate"]})
+    for item in insights["key_drivers"]:
+        writer.writerow({"section": "key_driver", "label": item["label"], "metric": "delta", "value": item["delta"]})
+    return buffer.getvalue()
+
+
+def student_csv(row):
+    buffer = StringIO()
+    profile = build_student_profile(row)
+    fieldnames = ["student_id", "branch", "college_tier", "placement", "probability", "readiness_score", "CGPA", "Internships", "Projects", "Certifications", "Communication_Skills", "Aptitude_Score", "Backlogs"]
+    writer = DictWriter(buffer, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerow({
+        "student_id": profile["student_id"],
+        "branch": profile["branch"],
+        "college_tier": profile["college_tier"],
+        "placement": profile["placement"],
+        "probability": profile["probability"],
+        "readiness_score": profile["readiness_score"],
+        **profile["profile"],
+    })
+    return buffer.getvalue()
+
+
+def dataset_predictions_csv():
+    df = pd.DataFrame(ROWS)
+    features = df[["CGPA", "Internships", "Projects", "Certifications", "Communication_Skills", "Aptitude_Score", "Backlogs"]].apply(pd.to_numeric, errors="coerce").fillna(0.0)
+    matrix = np.hstack([features.to_numpy(dtype=float), np.zeros((len(features), max(0, getattr(model, "n_features_in_", 7) - 7)), dtype=float)])
+    preds = model.predict(matrix)
+    probabilities = None
+    if hasattr(model, "predict_proba"):
+        try:
+            probabilities = model.predict_proba(matrix)
+        except Exception:
+            probabilities = None
+    output = StringIO()
+    writer = DictWriter(output, fieldnames=["student_id", "prediction", "probability", "CGPA", "Internships", "Projects", "Certifications", "Communication_Skills", "Aptitude_Score", "Backlogs"])
+    writer.writeheader()
+    for index, row in df.iterrows():
+        probability = None
+        if probabilities is not None:
+            probability = float(probabilities[index][1]) if probabilities.shape[1] > 1 else float(probabilities[index][0])
+        writer.writerow({
+            "student_id": row.get("student_id"),
+            "prediction": preds[index],
+            "probability": probability,
+            "CGPA": row.get("CGPA"),
+            "Internships": row.get("Internships"),
+            "Projects": row.get("Projects"),
+            "Certifications": row.get("Certifications"),
+            "Communication_Skills": row.get("Communication_Skills"),
+            "Aptitude_Score": row.get("Aptitude_Score"),
+            "Backlogs": row.get("Backlogs"),
+        })
+    return output.getvalue()
+
+
 class PlacementInput(BaseModel):
     CGPA: float = Field(ge=0, le=10)
     Internships: float = Field(ge=0)
@@ -327,6 +607,15 @@ class PlacementInput(BaseModel):
     Communication_Skills: float = Field(ge=0, le=100)
     Aptitude_Score: float = Field(ge=0, le=100)
     Backlogs: float = Field(ge=0)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+ROWS = load_rows()
+STUDENT_INDEX = build_student_index(ROWS)
 
 
 try:
@@ -362,7 +651,7 @@ try:
 except Exception:
     model = FallbackModel()
     model_runtime = "fallback"
-insights = build_insights(load_rows())
+insights = build_insights(ROWS)
 model_info = build_model_info(model)
 model_info["runtime"] = model_runtime
 if model_runtime == "fallback":
@@ -403,95 +692,153 @@ def get_site_data():
     }
 
 
+@app.post("/api/auth/login")
+def login(payload: LoginRequest):
+    user = USER_INDEX.get(payload.username)
+    if not user or user.get("password") != payload.password:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    token = uuid4().hex
+    session = get_user_public(user)
+    session["token"] = token
+    SESSIONS[token] = session
+
+    profile = None
+    if user.get("role") == "student":
+        student_row = get_row_for_student(user.get("student_id"))
+        if student_row:
+            profile = build_student_profile(student_row)
+
+    return {
+        "token": token,
+        "user": get_user_public(user),
+        "profile": profile,
+        "project": PROJECT_OVERVIEW,
+        "model": model_info,
+    }
+
+
+@app.post("/api/auth/logout")
+def logout(current_user: Dict[str, Any] = Depends(get_current_user)):
+    token = current_user.get("token")
+    if token and token in SESSIONS:
+        SESSIONS.pop(token, None)
+    return {"status": "ok"}
+
+
+@app.get("/api/auth/me")
+def me(current_user: Dict[str, Any] = Depends(get_current_user)):
+    profile = None
+    if current_user.get("role") == "student":
+        student_row = get_row_for_student(current_user.get("student_id"))
+        if student_row:
+            profile = build_student_profile(student_row)
+    return {
+        "user": {
+            "username": current_user["username"],
+            "role": current_user["role"],
+            "display_name": current_user.get("display_name") or current_user["username"],
+            "student_id": current_user.get("student_id"),
+        },
+        "profile": profile,
+    }
+
+
+@app.get("/api/bootstrap")
+def bootstrap(current_user: Dict[str, Any] = Depends(get_current_user)):
+    student_profiles = []
+    if current_user.get("role") == "admin":
+        for user in USER_INDEX.values():
+            if user.get("role") == "student" and user.get("student_id") is not None:
+                row = get_row_for_student(user.get("student_id"))
+                if row:
+                    payload = build_student_profile(row)
+                    payload["username"] = user["username"]
+                    payload["display_name"] = user.get("display_name") or user["username"]
+                    student_profiles.append(payload)
+    else:
+        student_row = get_row_for_student(current_user.get("student_id"))
+        if student_row:
+            student_profiles = [build_student_profile(student_row)]
+
+    return {
+        "user": {
+            "username": current_user["username"],
+            "role": current_user["role"],
+            "display_name": current_user.get("display_name") or current_user["username"],
+            "student_id": current_user.get("student_id"),
+        },
+        "project": PROJECT_OVERVIEW,
+        "model": model_info,
+        "insights": insights,
+        "students": student_profiles,
+    }
+
+
+@app.get("/api/students")
+def list_students(current_user: Dict[str, Any] = Depends(require_admin)):
+    student_profiles = []
+    for user in USER_INDEX.values():
+        if user.get("role") == "student" and user.get("student_id") is not None:
+            row = get_row_for_student(user.get("student_id"))
+            if row:
+                payload = build_student_profile(row)
+                payload["username"] = user["username"]
+                payload["display_name"] = user.get("display_name") or user["username"]
+                student_profiles.append(payload)
+    return student_profiles
+
+
+@app.get("/api/students/{student_id}")
+def get_student(student_id: int, current_user: Dict[str, Any] = Depends(get_current_user)):
+    if current_user.get("role") != "admin" and normalize_student_id(current_user.get("student_id")) != student_id:
+        raise HTTPException(status_code=403, detail="You can only access your own profile")
+    row = get_row_for_student(student_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return build_student_profile(row)
+
+
+@app.get("/api/download/overall.csv")
+def download_overall_csv(current_user: Dict[str, Any] = Depends(require_admin)):
+    return csv_response("overall_statistics.csv", overall_stats_csv())
+
+
+@app.get("/api/download/student.csv")
+def download_student_csv(student_id: Optional[int] = None, current_user: Dict[str, Any] = Depends(get_current_user)):
+    target_id = student_id if student_id is not None else normalize_student_id(current_user.get("student_id"))
+    if current_user.get("role") != "admin" and target_id != normalize_student_id(current_user.get("student_id")):
+        raise HTTPException(status_code=403, detail="You can only download your own record")
+    row = get_row_for_student(target_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return csv_response(f"student_{target_id}.csv", student_csv(row))
+
+
+@app.get("/api/download/dataset.csv")
+def download_dataset_csv(current_user: Dict[str, Any] = Depends(require_admin)):
+    return FileResponse(DATASET_PATH, filename="placement_dataset.csv", media_type="text/csv")
+
+
+@app.get("/api/download/predictions.csv")
+def download_predictions_csv(current_user: Dict[str, Any] = Depends(require_admin)):
+    return csv_response("dataset_predictions.csv", dataset_predictions_csv())
+
+
 @app.post("/api/predict")
-def predict(data: PlacementInput):
+def predict(data: PlacementInput, current_user: Dict[str, Any] = Depends(get_current_user)):
     if model is None:
         raise HTTPException(status_code=503, detail="Model is not available")
-    # If the saved model expects more than the seven site-level inputs, build a matching vector
-    if model_runtime == 'saved-model' and hasattr(model, 'n_features_in_') and getattr(model, 'n_features_in_', 0) != len(FEATURE_NAMES):
-        try:
-            # start from defaults reconstructed from the dataset
-            base = {c: feature_defaults.get(c, 0.0) for c in feature_defaults}
-            # overwrite with the seven provided inputs
-            base.update({
-                'CGPA': data.CGPA,
-                'Internships': data.Internships,
-                'Projects': data.Projects,
-                'Certifications': data.Certifications,
-                'Communication_Skills': data.Communication_Skills,
-                'Aptitude_Score': data.Aptitude_Score,
-                'Backlogs': data.Backlogs,
-            })
-            input_df = pd.DataFrame([base])
-            input_dummy = pd.get_dummies(input_df).reindex(columns=model_feature_columns, fill_value=0)
-            features = input_dummy.values.astype(float)
-        except Exception:
-            # fallback to the simple 7-feature vector if anything goes wrong
-            features = np.array([
-                data.CGPA,
-                data.Internships,
-                data.Projects,
-                data.Certifications,
-                data.Communication_Skills,
-                data.Aptitude_Score,
-                data.Backlogs,
-            ], dtype=float).reshape(1, -1)
-    else:
-        features = np.array(
-            [
-                data.CGPA,
-                data.Internships,
-                data.Projects,
-                data.Certifications,
-                data.Communication_Skills,
-                data.Aptitude_Score,
-                data.Backlogs,
-            ],
-            dtype=float,
-        ).reshape(1, -1)
-
-    try:
-        prediction = model.predict(features)[0]
-    except ValueError as ve:
-        msg = str(ve)
-        # try to extract expected feature count from error message and pad
-        import re
-
-        m = re.search(r"expected:\s*(\d+),\s*got\s*(\d+)", msg)
-        if m:
-            expected = int(m.group(1))
-            got = int(m.group(2))
-            if got < expected:
-                pad = np.zeros((1, expected - got), dtype=float)
-                try:
-                    padded = np.concatenate([features, pad], axis=1)
-                    prediction = model.predict(padded)[0]
-                    features = padded
-                except Exception:
-                    raise ve
-            else:
-                raise ve
-        else:
-            raise ve
-    probability = None
-    if hasattr(model, "predict_proba"):
-        try:
-            proba_values = model.predict_proba(features)[0]
-            positive_index = 1
-            if hasattr(model, "classes_"):
-                classes = list(model.classes_)
-                for candidate in (1, "1", True, "Placed", "placed", "Yes", "yes"):
-                    if candidate in classes:
-                        positive_index = classes.index(candidate)
-                        break
-            probability = float(proba_values[positive_index])
-        except Exception:
-            probability = None
-
-    if isinstance(prediction, str):
-        result_label = "Placed" if prediction.strip().lower() in {"1", "true", "yes", "placed"} else "Not Placed"
-    else:
-        result_label = "Placed" if int(prediction) == 1 else "Not Placed"
+    vector = core_vector_from_values(
+        data.CGPA,
+        data.Internships,
+        data.Projects,
+        data.Certifications,
+        data.Communication_Skills,
+        data.Aptitude_Score,
+        data.Backlogs,
+    )
+    result_label, probability = model_predict_from_vector(vector)
 
     return {
         "result": result_label,
