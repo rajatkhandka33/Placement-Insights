@@ -62,35 +62,6 @@ PROJECT_OVERVIEW = {
     ],
 }
 
-DEFAULT_USERS = [
-    {
-        "username": "admin",
-        "password": "admin123",
-        "role": "admin",
-        "display_name": "Placement Admin",
-    },
-    {
-        "username": "student1",
-        "password": "student123",
-        "role": "student",
-        "student_id": 1,
-        "display_name": "Student One",
-    },
-    {
-        "username": "student2",
-        "password": "student123",
-        "role": "student",
-        "student_id": 2,
-        "display_name": "Student Two",
-    },
-    {
-        "username": "student3",
-        "password": "student123",
-        "role": "student",
-        "student_id": 3,
-        "display_name": "Student Three",
-    },
-]
 
 app = FastAPI(title="Smart Placement and Insights", version="1.0.0")
 
@@ -192,18 +163,7 @@ def db_create_user(username: str, password: str, role: str = "student", display_
 @app.on_event("startup")
 def on_startup():
     init_db()
-    # migrate any existing users.json into DB if DB empty
-    existing = db_list_users()
-    if not existing:
-        users = load_users()
-        for u in users:
-            db_create_user(
-                username=u.get("username"),
-                password=u.get("password", ""),
-                role=u.get("role", "student"),
-                display_name=u.get("display_name"),
-                student_id=u.get("student_id"),
-            )
+    init_db()
 
 
 def load_model():
@@ -252,16 +212,6 @@ def load_rows():
         return list(DictReader(handle))
 
 
-def load_users():
-    if USERS_PATH.exists():
-        try:
-            with USERS_PATH.open("r", encoding="utf-8") as handle:
-                users = json.load(handle)
-                if isinstance(users, list) and users:
-                    return users
-        except Exception:
-            pass
-    return DEFAULT_USERS
 
 
 def normalize_student_id(value):
@@ -809,6 +759,44 @@ def get_site_data():
         "insights": insights,
     }
 
+
+@app.post("/api/auth/register")
+def register(payload: CreateStudentRequest):
+    # Check if this is the very first user in the system
+    users = db_list_users()
+    role = "admin" if len(users) == 0 else "student"
+    
+    # Actually register user in the db
+    user = db_create_user(
+        username=payload.username,
+        password=payload.password,
+        role=role,
+        display_name=payload.display_name or payload.username,
+        student_id=payload.student_id if role == "student" else None,
+    )
+    if not user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Auto-login the user
+    token = uuid4().hex
+    session = get_user_public(user)
+    session["token"] = token
+    SESSIONS[token] = session
+
+    profile = None
+    if getattr(user, "role", None) == "student" and getattr(user, "student_id", None) is not None:
+        student_row = get_row_for_student(user.student_id)
+        if student_row:
+            profile = build_student_profile(student_row)
+
+    return {
+        "message": "Registration successful",
+        "token": token,
+        "user": get_user_public(user),
+        "profile": profile,
+        "project": PROJECT_OVERVIEW,
+        "model": model_info,
+    }
 
 @app.post("/api/auth/login")
 def login(payload: LoginRequest):

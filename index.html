@@ -951,6 +951,8 @@
         const [pageError, setPageError] = useState("");
         const [pageNotice, setPageNotice] = useState("");
         const [busyDownload, setBusyDownload] = useState("");
+
+        const [authMode, setAuthMode] = useState("login");
         const [studentQueryId, setStudentQueryId] = useState("");
 
         const go = (value) => {
@@ -1163,10 +1165,11 @@
           setLoginError("");
           setPageError("");
           try {
-            const payload = await requestJSON("/api/auth/login", null, {
+            const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+            const payload = await requestJSON(endpoint, null, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(loginForm),
+              body: JSON.stringify({ ...loginForm, student_id: 100 }), // dummy student ID for registration
             });
             localStorage.setItem(STORAGE_KEY, payload.token);
             setToken(payload.token);
@@ -1229,31 +1232,11 @@
                     downloads. Admins can view the full dashboard, analytics,
                     student list, and CSV exports.
                   </p>
-                  <div className="overview-grid" style={{ marginTop: 18 }}>
-                    {demoCards.map((item) => (
-                      <div className="overview-card" key={item.label}>
-                        <div className="overview-label">{item.label}</div>
-                        <div
-                          className="overview-value"
-                          style={{ color: "white" }}
-                        >
-                          {item.value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <ul className="auth-tips">
-                    <li>Use the seeded demo accounts to start quickly.</li>
-                    <li>The app stays fully local after cloning the repo.</li>
-                    <li>
-                      Admins get access to analytics and dataset downloads.
-                    </li>
-                  </ul>
                 </div>
 
                 <div className="auth-form-panel">
                   <div className="section-title">
-                    <h2>Sign in</h2>
+                    <h2>{authMode === "login" ? "Sign in" : "Register"}</h2>
                     <span>Local role-based access</span>
                   </div>
                   <form className="auth-form" onSubmit={login}>
@@ -1268,7 +1251,8 @@
                             username: event.target.value,
                           }))
                         }
-                        placeholder="admin or student1"
+                        placeholder={authMode === "login" ? "Enter username" : "Choose username"}
+                        required
                       />
                     </label>
                     <label className="auth-field">
@@ -1282,36 +1266,44 @@
                             password: event.target.value,
                           }))
                         }
-                        placeholder="admin123 or student123"
+                        placeholder={authMode === "login" ? "Enter password" : "Choose password"}
+                        required
                       />
                     </label>
                     <button className="primary" type="submit">
-                      {loadingSession ? "Checking session..." : "Login"}
+                      {loadingSession ? "Checking session..." : (authMode === "login" ? "Login" : "Register")}
                     </button>
                     {loginError ? (
-                      <div className="status-line">{loginError}</div>
+                      <div className="status-line" style={{ color: "red", marginTop: 8 }}>{loginError}</div>
                     ) : null}
                   </form>
 
-                  <div className="section-title" style={{ marginTop: 20 }}>
-                    <h2>Demo accounts</h2>
+                  <div style={{ marginTop: 20, fontSize: "0.95rem" }}>
+                    {authMode === "login" ? (
+                      <p>
+                        Don't have an account?{" "}
+                        <a href="#register" onClick={(e) => { e.preventDefault(); setAuthMode("register"); }}>
+                          Register here
+                        </a>
+                      </p>
+                    ) : (
+                      <p>
+                        Already have an account?{" "}
+                        <a href="#login" onClick={(e) => { e.preventDefault(); setAuthMode("login"); }}>
+                          Login here
+                        </a>
+                      </p>
+                    )}
                   </div>
-                  <div className="section-empty">
-                    <strong>Admin</strong>: `admin / admin123`
-                    <br />
-                    <strong>Student</strong>: `student1 / student123`
-                    <br />
-                    <strong>Student</strong>: `student2 / student123`
-                    <br />
-                    <strong>Student</strong>: `student3 / student123`
-                  </div>
+
                   {pageError ? (
-                    <div className="status-line" style={{ marginTop: 14 }}>
+                    <div className="status-line" style={{ marginTop: 14, color: "red" }}>
                       {pageError}
                     </div>
                   ) : null}
                 </div>
               </div>
+
             </div>
           );
         }
