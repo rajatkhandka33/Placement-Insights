@@ -679,7 +679,24 @@ class CreateStudentRequest(BaseModel):
     username: str
     password: str
     display_name: Optional[str] = None
+    student_id: Optional[int] = None
+    role: str = "student"
+    admin_pin: Optional[str] = None
+
+class AddStudentDataRequest(BaseModel):
+    username: str
+    password: str
+    display_name: str
     student_id: int
+    branch: str
+    college_tier: str
+    CGPA: float
+    Internships: float
+    Projects: float
+    Certifications: float
+    Communication_Skills: float
+    Aptitude_Score: float
+    Backlogs: float
 
 
 ROWS = load_rows()
@@ -762,9 +779,12 @@ def get_site_data():
 
 @app.post("/api/auth/register")
 def register(payload: CreateStudentRequest):
-    # Check if this is the very first user in the system
-    users = db_list_users()
-    role = "admin" if len(users) == 0 else "student"
+    if payload.role == "admin":
+        if payload.admin_pin != "1390":
+            raise HTTPException(status_code=400, detail="Invalid admin PIN.")
+        role = "admin"
+    else:
+        role = "student"
     
     # Actually register user in the db
     user = db_create_user(
@@ -898,10 +918,68 @@ def list_students(current_user: Dict[str, Any] = Depends(require_admin)):
 
 
 @app.post("/api/admin/students")
-def create_student(payload: CreateStudentRequest, current_user: Dict[str, Any] = Depends(require_admin)):
+def create_student(payload: AddStudentDataRequest, current_user: Dict[str, Any] = Depends(require_admin)):
+    global insights
     exists = db_get_user_by_username(payload.username)
     if exists:
         raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # 1. Run ML inference using the same pattern as dataset_predictions_csv
+    features = np.array([[
+        float(payload.CGPA),
+        float(payload.Internships),
+        float(payload.Projects),
+        float(payload.Certifications),
+        float(payload.Communication_Skills),
+        float(payload.Aptitude_Score),
+        float(payload.Backlogs),
+    ]], dtype=float)
+    n_expected = getattr(model, "n_features_in_", 7)
+    if features.shape[1] < n_expected:
+        features = np.hstack([features, np.zeros((1, n_expected - features.shape[1]))])
+    pred = model.predict(features)[0]
+    probability = None
+    if hasattr(model, "predict_proba"):
+        try:
+            proba = model.predict_proba(features)[0]
+            probability = float(proba[1]) if len(proba) > 1 else float(proba[0])
+        except Exception:
+            pass
+    placement_label = str(pred)  # "1" or "0" depending on model output
+    
+    new_row = {
+        "student_id": payload.student_id,
+        "branch": payload.branch,
+        "college_tier": payload.college_tier,
+        "CGPA": payload.CGPA,
+        "Internships": payload.Internships,
+        "Projects": payload.Projects,
+        "Certifications": payload.Certifications,
+        "Communication_Skills": payload.Communication_Skills,
+        "Aptitude_Score": payload.Aptitude_Score,
+        "Backlogs": payload.Backlogs,
+        "Placement": placement_label,
+    }
+    
+    ROWS.append(new_row)
+    STUDENT_INDEX[payload.student_id] = new_row
+    
+    # Recalculate statistics dynamically
+    insights = build_insights(ROWS)
+    
+    # Write persistently to CSV
+    try:
+        import csv
+        file_exists = DATASET_PATH.exists()
+        with DATASET_PATH.open("a", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(new_row.keys()))
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(new_row)
+    except Exception as e:
+        print("Failed to write to final_dataset.csv", e)
+    
+    # 2. Create actual User Authentication
     created = db_create_user(
         username=payload.username,
         password=payload.password,
@@ -910,7 +988,7 @@ def create_student(payload: CreateStudentRequest, current_user: Dict[str, Any] =
         student_id=payload.student_id,
     )
     if not created:
-        raise HTTPException(status_code=500, detail="Failed to create user")
+        raise HTTPException(status_code=500, detail="Failed to create user account")
     return get_user_public(created)
 
 

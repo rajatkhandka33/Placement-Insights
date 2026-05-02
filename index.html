@@ -477,6 +477,7 @@
         display: grid;
         place-items: center;
         padding: 24px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(14, 165, 233, 0.12) 100%);
       }
 
       .auth-card {
@@ -932,6 +933,104 @@
         return value;
       }
 
+      const BRANCHES = ["CS", "IT", "ECE", "EEE", "ME", "CE", "Other"];
+      const COLLEGE_TIERS = ["Tier 1", "Tier 2", "Tier 3"];
+
+      function AddStudentForm({ token, onSuccess }) {
+        const emptyForm = {
+          username: "", password: "", display_name: "", student_id: "",
+          branch: "CS", college_tier: "Tier 2",
+          CGPA: "", Internships: "", Projects: "", Certifications: "",
+          Communication_Skills: "", Aptitude_Score: "", Backlogs: "",
+        };
+        const [form, setForm] = React.useState(emptyForm);
+        const [loading, setLoading] = React.useState(false);
+        const [error, setError] = React.useState("");
+        const [success, setSuccess] = React.useState("");
+
+        const field = (key) => ({
+          value: form[key],
+          onChange: (e) => setForm((f) => ({ ...f, [key]: e.target.value })),
+        });
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setError(""); setSuccess("");
+          setLoading(true);
+          try {
+            const body = {
+              ...form,
+              student_id: parseInt(form.student_id),
+              CGPA: parseFloat(form.CGPA),
+              Internships: parseFloat(form.Internships),
+              Projects: parseFloat(form.Projects),
+              Certifications: parseFloat(form.Certifications),
+              Communication_Skills: parseFloat(form.Communication_Skills),
+              Aptitude_Score: parseFloat(form.Aptitude_Score),
+              Backlogs: parseFloat(form.Backlogs),
+            };
+            await requestJSON("/api/admin/students", token, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            setSuccess("Student registered and prediction generated successfully!");
+            setForm(emptyForm);
+            if (onSuccess) await onSuccess();
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        const inputStyle = {
+          width: "100%", border: "1px solid rgba(31,35,40,0.15)",
+          background: "rgba(255,255,255,0.9)", borderRadius: "8px",
+          padding: "7px 10px", font: "inherit", fontSize: "0.82rem",
+          outline: "none", boxSizing: "border-box",
+        };
+        const selectStyle = { ...inputStyle, height: "34px" };
+        const gridStyle = {
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px",
+        };
+
+        return (
+          <form onSubmit={handleSubmit} style={{ padding: "4px 0 6px" }}>
+            <div style={gridStyle}>
+              <label className="auth-field">Display Name<input {...field("display_name")} style={inputStyle} placeholder="e.g. Alice Smith" required /></label>
+              <label className="auth-field">Student ID<input {...field("student_id")} style={inputStyle} placeholder="Unique numeric ID" type="number" required /></label>
+              <label className="auth-field">Username (for login)<input {...field("username")} style={inputStyle} placeholder="Login username" required /></label>
+              <label className="auth-field">Password<input {...field("password")} style={inputStyle} placeholder="Login password" type="password" required /></label>
+              <label className="auth-field">Branch
+                <select {...field("branch")} style={selectStyle}>
+                  {BRANCHES.map((b) => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </label>
+              <label className="auth-field">College Tier
+                <select {...field("college_tier")} style={selectStyle}>
+                  {COLLEGE_TIERS.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </label>
+            </div>
+            <div style={{ ...gridStyle, gridTemplateColumns: "repeat(3, 1fr)" }}>
+              <label className="auth-field">CGPA (0–10)<input {...field("CGPA")} style={inputStyle} placeholder="e.g. 7.8" type="number" step="0.01" min="0" max="10" required /></label>
+              <label className="auth-field">Internships<input {...field("Internships")} style={inputStyle} placeholder="e.g. 1" type="number" min="0" required /></label>
+              <label className="auth-field">Projects<input {...field("Projects")} style={inputStyle} placeholder="e.g. 3" type="number" min="0" required /></label>
+              <label className="auth-field">Certifications<input {...field("Certifications")} style={inputStyle} placeholder="e.g. 2" type="number" min="0" required /></label>
+              <label className="auth-field">Communication Skills (1–10)<input {...field("Communication_Skills")} style={inputStyle} placeholder="e.g. 7" type="number" step="0.1" min="1" max="10" required /></label>
+              <label className="auth-field">Aptitude Score (0–100)<input {...field("Aptitude_Score")} style={inputStyle} placeholder="e.g. 72" type="number" min="0" max="100" required /></label>
+              <label className="auth-field">Backlogs<input {...field("Backlogs")} style={inputStyle} placeholder="e.g. 0" type="number" min="0" required /></label>
+            </div>
+            <button className="primary" type="submit" disabled={loading} style={{ marginTop: 6 }}>
+              {loading ? "Registering & predicting..." : "Add Student + Run AI Prediction"}
+            </button>
+            {error && <div className="status-line" style={{ color: "red", marginTop: 8 }}>{error}</div>}
+            {success && <div className="status-line" style={{ color: "green", marginTop: 8 }}>{success}</div>}
+          </form>
+        );
+      }
+
       function App() {
         const [route, setRoute] = useState(parseRoute());
         const [token, setToken] = useState(
@@ -942,10 +1041,7 @@
         const [publicData, setPublicData] = useState(null);
         const [students, setStudents] = useState([]);
         const [selectedStudentId, setSelectedStudentId] = useState(null);
-        const [loginForm, setLoginForm] = useState({
-          username: "admin",
-          password: "admin123",
-        });
+
         const [loadingSession, setLoadingSession] = useState(Boolean(token));
         const [loginError, setLoginError] = useState("");
         const [pageError, setPageError] = useState("");
@@ -954,6 +1050,12 @@
 
         const [authMode, setAuthMode] = useState("login");
         const [studentQueryId, setStudentQueryId] = useState("");
+        const [loginForm, setLoginForm] = useState({
+          username: "",
+          password: "",
+          role: "student",
+          admin_pin: "",
+        });
 
         const go = (value) => {
           window.location.hash = `#${value}`;
@@ -1166,10 +1268,13 @@
           setPageError("");
           try {
             const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+            const bodyPayload = authMode === "login" 
+                ? { username: loginForm.username, password: loginForm.password } 
+                : { ...loginForm, student_id: loginForm.role === "student" ? 100 : null };
             const payload = await requestJSON(endpoint, null, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...loginForm, student_id: 100 }), // dummy student ID for registration
+              body: JSON.stringify(bodyPayload),
             });
             localStorage.setItem(STORAGE_KEY, payload.token);
             setToken(payload.token);
@@ -1270,6 +1375,49 @@
                         required
                       />
                     </label>
+                    {authMode === "register" && (
+                      <label className="auth-field">
+                        Role
+                        <select
+                          style={{
+                            width: "100%",
+                            border: "1px solid rgba(31, 35, 40, 0.12)",
+                            background: "rgba(255, 255, 255, 0.9)",
+                            borderRadius: "14px",
+                            padding: "12px 14px",
+                            font: "inherit",
+                            outline: "none"
+                          }}
+                          value={loginForm.role}
+                          onChange={(e) =>
+                            setLoginForm((current) => ({
+                              ...current,
+                              role: e.target.value,
+                            }))
+                          }
+                        >
+                          <option value="student">Student</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </label>
+                    )}
+                    {authMode === "register" && loginForm.role === "admin" && (
+                      <label className="auth-field">
+                        Admin PIN
+                        <input
+                          type="password"
+                          value={loginForm.admin_pin}
+                          onChange={(event) =>
+                            setLoginForm((current) => ({
+                              ...current,
+                              admin_pin: event.target.value,
+                            }))
+                          }
+                          placeholder="Enter admin PIN"
+                          required
+                        />
+                      </label>
+                    )}
                     <button className="primary" type="submit">
                       {loadingSession ? "Checking session..." : (authMode === "login" ? "Login" : "Register")}
                     </button>
@@ -1520,6 +1668,16 @@
                 )}
               </div>
             </section>
+
+            {isAdmin && (
+              <section className="section-card">
+                <div className="section-title">
+                  <h2>Add New Student</h2>
+                  <span>Admin: Register student + run AI prediction</span>
+                </div>
+                <AddStudentForm token={token} onSuccess={async () => { await refreshSession(token); }} />
+              </section>
+            )}
 
             <section className="section-card">
               <div className="section-title">
