@@ -551,13 +551,13 @@ def model_predict_from_vector(vector):
 
 def predict_row(row):
     vector = core_vector_from_values(
-        row.get("CGPA", 0),
-        row.get("Internships", 0),
-        row.get("Projects", 0),
-        row.get("Certifications", 0),
-        row.get("Communication_Skills", 0),
-        row.get("Aptitude_Score", 0),
-        row.get("Backlogs", 0),
+        to_float(row.get("CGPA")) or 0.0,
+        to_float(row.get("Internships")) or 0.0,
+        to_float(row.get("Projects")) or 0.0,
+        to_float(row.get("Certifications")) or 0.0,
+        to_float(row.get("Communication_Skills")) or 0.0,
+        to_float(row.get("Aptitude_Score")) or 0.0,
+        to_float(row.get("Backlogs")) or 0.0,
     )
     return model_predict_from_vector(vector)
 
