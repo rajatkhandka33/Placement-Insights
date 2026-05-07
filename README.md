@@ -67,7 +67,7 @@ http://127.0.0.1:8000
 ```
 
 7. Log in with one of the seeded local accounts:
-
+   
 ```text
 Admin: admin / admin123
 Student: student1 / student123
@@ -87,4 +87,4 @@ Student: student3 / student123
 - If the machine has limited disk space, install into a clean environment or a drive with enough free space before running the server.
 - The server exposes the prediction API at `/api/predict` and the metadata API at `/api/model-info`.
 - New: user accounts are now persisted in a local SQLite DB by default. To override the DB path (or use Postgres), set the `DATABASE_URL` environment variable before starting the server.
-  Example (default SQLite): `DATABASE_URL=sqlite:///./db.sqlite3`
+Example (default SQLite): `DATABASE_URL=sqlite:///./db.sqlite3`
